@@ -125,7 +125,7 @@ export default function Dashboard({ user, setUser }) {
               </div>
 
               {game.status !== 'finalizado' ? (
-                <button className="btn" style={{ position: 'relative', zIndex: 9999 }} onClick={() => openBetModal(game.id)}>
+                <button className="btn" onClick={() => openBetModal(game.id)}>
                   Dar Meu Palpite (R$ 10,00)
                 </button>
               ) : (
