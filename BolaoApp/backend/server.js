@@ -113,7 +113,7 @@ app.post('/bet', authenticateToken, async (req, res) => {
                 payment_method_id: 'pix',
                 payer: { email: req.user.email || 'bolao@exemplo.com' },
                 external_reference: aposta_id.toString(),
-                notification_url: process.env.WEBHOOK_URL + '/webhook' // Precisa ser URL publica
+                notification_url: (process.env.RENDER_EXTERNAL_URL || process.env.WEBHOOK_URL || 'https://bolaoonline.onrender.com') + '/webhook'
             }
         });
 
