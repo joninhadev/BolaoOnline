@@ -21,13 +21,13 @@ export default function Dashboard({ user, setUser }) {
 
   const fetchData = async () => {
     try {
-      const resGames = await axios.get('http://localhost:5000/games', { headers: { Authorization: `Bearer ${token}` } });
+      const resGames = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/games'), { headers: { Authorization: `Bearer ${token}` } });
       setGames(resGames.data);
       
-      const resBets = await axios.get('http://localhost:5000/my-bets', { headers: { Authorization: `Bearer ${token}` } });
+      const resBets = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/my-bets'), { headers: { Authorization: `Bearer ${token}` } });
       setMyBets(resBets.data);
 
-      const resPool = await axios.get('http://localhost:5000/pool-total', { headers: { Authorization: `Bearer ${token}` } });
+      const resPool = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/pool-total'), { headers: { Authorization: `Bearer ${token}` } });
       setPoolTotal(resPool.data.total);
     } catch (err) {
       console.error(err);
@@ -50,7 +50,7 @@ export default function Dashboard({ user, setUser }) {
     setLoading(true);
     setModalError('');
     try {
-      const res = await axios.post('http://localhost:5000/bet', 
+      const res = await axios.post(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/bet'), 
         { game_id: activeGameId, gols_casa: golsCasa, gols_fora: golsFora }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -71,7 +71,7 @@ export default function Dashboard({ user, setUser }) {
   useEffect(() => {
     // Escuta avisos de pagamentos aprovados do servidor (Mercado Pago Webhook)
     import('socket.io-client').then(({ io }) => {
-      const socket = io('http://localhost:5000');
+      const socket = io((import.meta.env.VITE_API_URL || 'http://localhost:5000'));
       socket.on('paymentApproved', () => {
         fetchData(); // Atualiza a tela automaticamente quando o PIX cair!
       });

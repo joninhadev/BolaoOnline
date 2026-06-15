@@ -11,7 +11,7 @@ export default function Login({ setUser }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/login', { email, senha });
+      const res = await axios.post(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/login'), { email, senha });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('nome', res.data.nome);
       setUser({ nome: res.data.nome });

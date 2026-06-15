@@ -12,7 +12,7 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/register', { nome_completo: nome, email, senha });
+      await axios.post(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/register'), { nome_completo: nome, email, senha });
       navigate('/login');
     } catch (error) {
       setErro(error.response?.data?.error || 'Erro ao registrar');
