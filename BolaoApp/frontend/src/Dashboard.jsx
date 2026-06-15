@@ -46,7 +46,6 @@ export default function Dashboard({ user, setUser }) {
   }, []);
 
   const openBetModal = (gameId) => {
-    alert("Iniciando abertura do modal! ID: " + gameId);
     try {
         setActiveGameId(gameId);
         setGolsCasa(0);
