@@ -46,11 +46,16 @@ export default function Dashboard({ user, setUser }) {
   }, []);
 
   const openBetModal = (gameId) => {
-    setActiveGameId(gameId);
-    setGolsCasa(0);
-    setGolsFora(0);
-    setQrCodeData(null);
-    setModalError('');
+    alert("Iniciando abertura do modal! ID: " + gameId);
+    try {
+        setActiveGameId(gameId);
+        setGolsCasa(0);
+        setGolsFora(0);
+        setQrCodeData(null);
+        setModalError('');
+    } catch(err) {
+        alert("Erro no react: " + err.message);
+    }
   };
 
   const handleBet = async () => {

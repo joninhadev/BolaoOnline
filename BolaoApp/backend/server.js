@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
     socket.on('sendMessage', (data) => {
         const message = {
             id: Date.now(), user: data.user, text: data.text,
-            time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+            time: new Date().toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' })
         };
         chatHistory.push(message);
         if (chatHistory.length > 50) chatHistory.shift();
