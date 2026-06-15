@@ -7,6 +7,7 @@ export default function Dashboard({ user, setUser }) {
   const [games, setGames] = useState([]);
   const [myBets, setMyBets] = useState([]);
   const [poolTotal, setPoolTotal] = useState(0);
+  const [winners, setWinners] = useState([]);
   
   // Modal states
   const [activeGameId, setActiveGameId] = useState(null);
@@ -29,6 +30,12 @@ export default function Dashboard({ user, setUser }) {
 
       const resPool = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/pool-total'), { headers: { Authorization: `Bearer ${token}` } });
       setPoolTotal(resPool.data.total);
+
+      // Busca ganhadores do primeiro jogo (se finalizado)
+      if (resGames.data.length > 0 && resGames.data[0].status === 'finalizado') {
+         const resWinners = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/winners/' + resGames.data[0].id), { headers: { Authorization: `Bearer ${token}` } });
+         setWinners(resWinners.data);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -69,12 +76,11 @@ export default function Dashboard({ user, setUser }) {
   };
 
   useEffect(() => {
-    // Escuta avisos de pagamentos aprovados do servidor (Mercado Pago Webhook)
+    // Escuta avisos do servidor
     import('socket.io-client').then(({ io }) => {
       const socket = io((import.meta.env.VITE_API_URL || 'http://localhost:5000'));
-      socket.on('paymentApproved', () => {
-        fetchData(); // Atualiza a tela automaticamente quando o PIX cair!
-      });
+      socket.on('paymentApproved', () => fetchData());
+      socket.on('gameFinished', () => fetchData());
       return () => socket.disconnect();
     });
   }, []);
@@ -99,21 +105,38 @@ export default function Dashboard({ user, setUser }) {
         <div className="pool-total">
           <p>Prêmio Acumulado do Bolão</p>
           <h2>R$ {Number(poolTotal).toFixed(2).replace('.', ',')}</h2>
+          <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>Já descontada a taxa de gerência (20%)</p>
         </div>
 
-        <h3 style={{marginBottom: '1.5rem'}}>Aposta Oficial (Até dia 19/06 21:25)</h3>
+        <h3 style={{marginBottom: '1.5rem'}}>Aposta Oficial</h3>
         <div className="games-grid">
           {games.map(game => (
             <div key={game.id} className="glass-panel game-card">
               <p style={{color: 'var(--primary)', fontWeight: '600', marginBottom: '1rem'}}>{new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
+              
               <div className="matchup">
-                <span>{game.time_casa}</span>
+                <span>{game.time_casa} {game.status === 'finalizado' ? game.gols_casa_real : ''}</span>
                 <span className="vs">X</span>
-                <span>{game.time_fora}</span>
+                <span>{game.status === 'finalizado' ? game.gols_fora_real : ''} {game.time_fora}</span>
               </div>
-              <button className="btn" onClick={() => openBetModal(game.id)}>
-                Dar Meu Palpite (R$ 10,00)
-              </button>
+
+              {game.status !== 'finalizado' ? (
+                <button className="btn" onClick={() => openBetModal(game.id)}>
+                  Dar Meu Palpite (R$ 10,00)
+                </button>
+              ) : (
+                <div style={{marginTop: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '12px'}}>
+                  <h3 style={{color: '#10b981', marginBottom: '1rem'}}>Fim de Jogo!</h3>
+                  <p style={{color: 'var(--text-main)', marginBottom: '1rem'}}>
+                    {winners.length > 0 ? `Os ganhadores vão dividir os R$ ${poolTotal.toFixed(2)}!` : 'Ninguém acertou o placar exato desta vez!'}
+                  </p>
+                  {winners.map((w, i) => (
+                    <div key={i} style={{fontWeight: 'bold', color: 'var(--primary)', fontSize: '1.2rem', margin: '0.5rem 0'}}>
+                      🏆 {w.nome_completo}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

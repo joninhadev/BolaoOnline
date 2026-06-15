@@ -172,12 +172,68 @@ app.get('/my-bets', authenticateToken, async (req, res) => {
 
 app.get('/pool-total', authenticateToken, async (req, res) => {
     try {
-        // SÓ SOMA APOSTAS APROVADAS!
+        // SÓ SOMA APOSTAS APROVADAS E TIRA 20% DO ADMIN!
         const [result] = await pool.query('SELECT SUM(valor) as total FROM bets WHERE status_pagamento = "aprovado"');
-        const total = result[0].total || 0;
-        res.json({ total });
+        const totalBruto = result[0].total || 0;
+        const totalLiquido = totalBruto * 0.8;
+        res.json({ total: totalLiquido });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao calcular o prêmio.' });
+    }
+});
+
+// ==========================================
+// ROTAS DE ADMINISTRAÇÃO E GANHADORES
+// ==========================================
+app.post('/admin/finish', async (req, res) => {
+    try {
+        const { password, game_id, gols_casa, gols_fora } = req.body;
+        
+        // Verifica Senha Mestra
+        const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+        if (password !== adminPass) {
+            return res.status(403).json({ error: 'Senha incorreta!' });
+        }
+
+        // Atualiza o jogo com o placar real e muda status
+        await pool.query(
+            'UPDATE games SET gols_casa_real = ?, gols_fora_real = ?, status = "finalizado" WHERE id = ?',
+            [gols_casa, gols_fora, game_id]
+        );
+
+        io.emit('gameFinished', { game_id, gols_casa, gols_fora });
+        io.emit('newMessage', { id: Date.now(), user: 'Sistema', text: `🏆 FIM DE JOGO! O resultado final foi ${gols_casa} x ${gols_fora}!`, time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) });
+
+        res.json({ message: 'Bolão encerrado com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao encerrar o bolão.' });
+    }
+});
+
+app.get('/winners/:game_id', authenticateToken, async (req, res) => {
+    try {
+        const { game_id } = req.params;
+        
+        // Pega o placar real do jogo
+        const [games] = await pool.query('SELECT gols_casa_real, gols_fora_real, status FROM games WHERE id = ?', [game_id]);
+        if (games.length === 0 || games[0].status !== 'finalizado') {
+            return res.json([]);
+        }
+
+        const realCasa = games[0].gols_casa_real;
+        const realFora = games[0].gols_fora_real;
+
+        // Busca usuários que acertaram o placar e pagaram
+        const [winners] = await pool.query(`
+            SELECT u.nome_completo, b.gols_casa, b.gols_fora 
+            FROM bets b
+            JOIN users u ON b.user_id = u.id
+            WHERE b.game_id = ? AND b.status_pagamento = "aprovado" AND b.gols_casa = ? AND b.gols_fora = ?
+        `, [game_id, realCasa, realFora]);
+
+        res.json(winners);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao buscar ganhadores.' });
     }
 });
 
