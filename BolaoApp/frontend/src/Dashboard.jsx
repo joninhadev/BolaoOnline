@@ -83,7 +83,11 @@ export default function Dashboard({ user, setUser }) {
     // Escuta avisos do servidor
     import('socket.io-client').then(({ io }) => {
       const socket = io((import.meta.env.VITE_API_URL || 'http://localhost:5000'));
-      socket.on('paymentApproved', () => fetchData());
+      socket.on('paymentApproved', () => {
+        fetchData();
+        setActiveGameId(null);
+        alert("Pagamento PIX Aprovado com Sucesso!");
+      });
       socket.on('gameFinished', () => fetchData());
       return () => socket.disconnect();
     });
