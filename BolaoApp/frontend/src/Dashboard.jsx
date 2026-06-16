@@ -93,15 +93,21 @@ export default function Dashboard({ user, setUser }) {
     });
   }, []);
 
-  const getFlag = (teamName) => {
-    const flags = {
-      'Brasil': '🇧🇷', 'Haiti': '🇭🇹', 'Argentina': '🇦🇷', 'Alemanha': '🇩🇪',
-      'França': '🇫🇷', 'Espanha': '🇪🇸', 'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Itália': '🇮🇹',
-      'Portugal': '🇵🇹', 'Uruguai': '🇺🇾', 'Colômbia': '🇨🇴', 'Chile': '🇨🇱',
-      'Holanda': '🇳🇱', 'Bélgica': '🇧🇪', 'Croácia': '🇭🇷', 'México': '🇲🇽',
-      'EUA': '🇺🇸', 'Japão': '🇯🇵', 'Coreia do Sul': '🇰🇷', 'Austrália': '🇦🇺'
+  const getFlagCode = (teamName) => {
+    const codes = {
+      'Brasil': 'br', 'Haiti': 'ht', 'Argentina': 'ar', 'Alemanha': 'de',
+      'França': 'fr', 'Espanha': 'es', 'Inglaterra': 'gb-eng', 'Itália': 'it',
+      'Portugal': 'pt', 'Uruguai': 'uy', 'Colômbia': 'co', 'Chile': 'cl',
+      'Holanda': 'nl', 'Bélgica': 'be', 'Croácia': 'hr', 'México': 'mx',
+      'EUA': 'us', 'Japão': 'jp', 'Coreia do Sul': 'kr', 'Austrália': 'au'
     };
-    return flags[teamName] || '⚽';
+    return codes[teamName] || null;
+  };
+
+  const Flag = ({ teamName }) => {
+    const code = getFlagCode(teamName);
+    if (!code) return <span>⚽</span>;
+    return <img src={`https://flagcdn.com/w40/${code}.png`} width="28" style={{borderRadius: '4px', verticalAlign: 'middle', margin: '0 6px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)'}} alt={teamName} />;
   };
 
   const logout = () => {
@@ -133,9 +139,9 @@ export default function Dashboard({ user, setUser }) {
               <p style={{color: 'var(--primary)', fontWeight: '600', marginBottom: '1rem'}}>📅 {new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
               
               <div className="matchup">
-                <span>{getFlag(game.time_casa)} {game.time_casa} {game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_casa_real}</span> : ''}</span>
+                <span><Flag teamName={game.time_casa} /> {game.time_casa} {game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_casa_real}</span> : ''}</span>
                 <span className="vs">💥</span>
-                <span>{game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_fora_real}</span> : ''} {game.time_fora} {getFlag(game.time_fora)}</span>
+                <span>{game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_fora_real}</span> : ''} {game.time_fora} <Flag teamName={game.time_fora} /></span>
               </div>
 
               {game.status !== 'finalizado' ? (
@@ -167,7 +173,7 @@ export default function Dashboard({ user, setUser }) {
                 <div key={bet.id} className="bet-item">
                   <div>
                     <strong style={{color:'var(--primary)'}}>
-                      {getFlag(bet.time_casa)} {bet.time_casa} {bet.gols_casa} x {bet.gols_fora} {bet.time_fora} {getFlag(bet.time_fora)}
+                      <Flag teamName={bet.time_casa} /> {bet.time_casa} {bet.gols_casa} x {bet.gols_fora} {bet.time_fora} <Flag teamName={bet.time_fora} />
                     </strong>
                     <div style={{fontSize:'0.8rem', color:'var(--text-muted)', marginTop:'0.2rem'}}>⌚ {new Date(bet.criado_em).toLocaleString('pt-BR')}</div>
                   </div>
