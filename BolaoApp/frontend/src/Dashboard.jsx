@@ -90,19 +90,27 @@ export default function Dashboard({ user, setUser }) {
   }, []);
 
   const getFlagCode = (teamName) => {
+    if (!teamName) return null;
+    const name = teamName.trim().toLowerCase();
     const codes = {
-      'Brasil': 'br', 'Haiti': 'ht', 'Argentina': 'ar', 'Alemanha': 'de',
-      'França': 'fr', 'Espanha': 'es', 'Inglaterra': 'gb-eng', 'Itália': 'it',
-      'Portugal': 'pt', 'Uruguai': 'uy', 'Colômbia': 'co', 'Chile': 'cl',
-      'Holanda': 'nl', 'Bélgica': 'be', 'Croácia': 'hr', 'México': 'mx',
-      'EUA': 'us', 'Japão': 'jp', 'Coreia do Sul': 'kr', 'Austrália': 'au'
+      'brasil': 'br', 'haiti': 'ht', 'argentina': 'ar', 'alemanha': 'de',
+      'frança': 'fr', 'espanha': 'es', 'inglaterra': 'gb-eng', 'itália': 'it',
+      'portugal': 'pt', 'uruguai': 'uy', 'colômbia': 'co', 'chile': 'cl',
+      'holanda': 'nl', 'bélgica': 'be', 'croácia': 'hr', 'méxico': 'mx',
+      'eua': 'us', 'japão': 'jp', 'coreia do sul': 'kr', 'austrália': 'au',
+      'bolívia': 'bo', 'peru': 'pe', 'paraguai': 'py', 'equador': 'ec',
+      'venezuela': 've', 'suíça': 'ch', 'suiça': 'ch', 'suécia': 'se',
+      'polônia': 'pl', 'marrocos': 'ma', 'senegal': 'sn', 'canadá': 'ca',
+      'camarões': 'cm', 'sérvia': 'rs', 'gana': 'gh', 'costa rica': 'cr',
+      'país de gales': 'gb-wls', 'dinamarca': 'dk', 'tunísia': 'tn', 
+      'arábia saudita': 'sa', 'catar': 'qa'
     };
-    return codes[teamName] || null;
+    return codes[name] || null;
   };
 
   const Flag = ({ teamName }) => {
     const code = getFlagCode(teamName);
-    if (!code) return <span>⚽</span>;
+    if (!code) return null;
     return <img src={`https://flagcdn.com/w40/${code}.png`} width="28" style={{borderRadius: '4px', verticalAlign: 'middle', margin: '0 6px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)'}} alt={teamName} />;
   };
 
