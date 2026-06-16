@@ -6,7 +6,7 @@ import Chat from './Chat';
 export default function Dashboard({ user, setUser }) {
   const [games, setGames] = useState([]);
   const [myBets, setMyBets] = useState([]);
-  const [winners, setWinners] = useState([]);
+  const [winnersMap, setWinnersMap] = useState({});
   
   // Modal states
   const [activeGameId, setActiveGameId] = useState(null);
@@ -27,11 +27,13 @@ export default function Dashboard({ user, setUser }) {
       const resBets = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/my-bets'), { headers: { Authorization: `Bearer ${token}` } });
       setMyBets(resBets.data);
 
-      // Busca ganhadores do primeiro jogo (se finalizado)
-      if (resGames.data.length > 0 && resGames.data[0].status === 'finalizado') {
-         const resWinners = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/winners/' + resGames.data[0].id), { headers: { Authorization: `Bearer ${token}` } });
-         setWinners(resWinners.data);
+      const newWinnersMap = {};
+      const finishedGames = resGames.data.filter(g => g.status === 'finalizado');
+      for (let g of finishedGames) {
+         const resWinners = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/winners/' + g.id), { headers: { Authorization: `Bearer ${token}` } });
+         newWinnersMap[g.id] = resWinners.data;
       }
+      setWinnersMap(newWinnersMap);
     } catch (err) {
       console.error(err);
     }
@@ -230,14 +232,30 @@ export default function Dashboard({ user, setUser }) {
                   return (
                 <div style={{marginTop: '1.5rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--primary)', borderRadius: '8px'}}>
                   <h3 style={{color: 'var(--primary)', marginBottom: '1rem', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px'}}>Partida Encerrada</h3>
-                  <p style={{color: 'var(--text-main)', marginBottom: '1rem', fontSize: '0.875rem'}}>
-                    {winners.length > 0 ? `Os ganhadores dividirão o prêmio de R$ ${Number(game.prize_pool || 0).toFixed(2)}.` : 'Ninguém acertou o placar exato desta vez.'}
-                  </p>
-                  {winners.map((w, i) => (
-                    <div key={i} style={{fontWeight: '600', color: 'var(--text-main)', margin: '0.5rem 0'}}>
-                      {w.nome_completo}
-                    </div>
-                  ))}
+                  
+                  {(() => {
+                    const gameWinners = winnersMap[game.id] || [];
+                    const didIWin = gameWinners.some(w => w.nome_completo === user.nome);
+                    
+                    return (
+                      <>
+                        {didIWin && (
+                          <div style={{ background: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)' }}>
+                            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.2rem' }}>🎉 VOCÊ GANHOU! 🎉</h4>
+                            <p style={{ fontSize: '0.9rem' }}>Parabéns, seu palpite foi certeiro. Você tem direito a uma parte do prêmio de R$ {Number(game.prize_pool || 0).toFixed(2).replace('.', ',')}!</p>
+                          </div>
+                        )}
+                        <p style={{color: 'var(--text-main)', marginBottom: '1rem', fontSize: '0.875rem'}}>
+                          {gameWinners.length > 0 ? `Os ganhadores dividirão o prêmio de R$ ${Number(game.prize_pool || 0).toFixed(2).replace('.', ',')}.` : 'Ninguém acertou o placar exato desta vez.'}
+                        </p>
+                        {gameWinners.map((w, i) => (
+                          <div key={i} style={{fontWeight: '600', color: w.nome_completo === user.nome ? 'var(--primary)' : 'var(--text-main)', margin: '0.5rem 0'}}>
+                            {w.nome_completo} {w.nome_completo === user.nome && '(Você)'}
+                          </div>
+                        ))}
+                      </>
+                    );
+                  })()}
                 </div>
                   );
                 }
