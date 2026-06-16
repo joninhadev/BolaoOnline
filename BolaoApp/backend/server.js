@@ -78,7 +78,13 @@ app.post('/login', async (req, res) => {
 // ==========================================
 app.get('/games', authenticateToken, async (req, res) => {
     try {
-        const [games] = await pool.query('SELECT * FROM games ORDER BY data_jogo ASC');
+        const [games] = await pool.query(`
+            SELECT g.*, COALESCE(SUM(b.valor), 0) * 0.8 as prize_pool 
+            FROM games g 
+            LEFT JOIN bets b ON g.id = b.game_id AND b.status_pagamento = 'aprovado' 
+            GROUP BY g.id 
+            ORDER BY g.data_jogo ASC
+        `);
         res.json(games);
     } catch (error) {
         res.status(500).json({ error: 'Erro ao buscar jogos.' });
@@ -173,15 +179,41 @@ app.get('/my-bets', authenticateToken, async (req, res) => {
     }
 });
 
-app.get('/pool-total', authenticateToken, async (req, res) => {
+app.post('/admin/reset', async (req, res) => {
     try {
-        // SÓ SOMA APOSTAS APROVADAS E TIRA 20% DO ADMIN!
-        const [result] = await pool.query('SELECT SUM(valor) as total FROM bets WHERE status_pagamento = "aprovado"');
-        const totalBruto = result[0].total || 0;
-        const totalLiquido = totalBruto * 0.8;
-        res.json({ total: totalLiquido });
+        const { password } = req.body;
+        const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+        if (password !== adminPass) return res.status(403).json({ error: 'Senha incorreta!' });
+
+        await pool.query('DELETE FROM bets');
+        await pool.query('DELETE FROM games');
+        await pool.query('ALTER TABLE games AUTO_INCREMENT = 1');
+        await pool.query('ALTER TABLE bets AUTO_INCREMENT = 1');
+        
+        io.emit('gameFinished', {}); // trigger para recarregar tudo no cliente
+        res.json({ message: 'Sistema zerado com sucesso! Todos os jogos e apostas foram apagados.' });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao calcular o prêmio.' });
+        res.status(500).json({ error: 'Erro ao zerar o banco de dados.' });
+    }
+});
+
+app.post('/admin/all-bets', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+        if (password !== adminPass) return res.status(403).json({ error: 'Senha incorreta!' });
+
+        const [bets] = await pool.query(`
+            SELECT b.id, b.gols_casa, b.gols_fora, b.valor, b.status_pagamento, b.criado_em, 
+                   u.nome_completo, g.time_casa, g.time_fora 
+            FROM bets b 
+            JOIN users u ON b.user_id = u.id 
+            JOIN games g ON b.game_id = g.id 
+            ORDER BY b.criado_em DESC
+        `);
+        res.json(bets);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao buscar histórico de palpites.' });
     }
 });
 

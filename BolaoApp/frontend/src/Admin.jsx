@@ -20,6 +20,9 @@ export default function Admin() {
     const [golsCasa, setGolsCasa] = useState('');
     const [golsFora, setGolsFora] = useState('');
 
+    // Histórico de Palpites
+    const [allBets, setAllBets] = useState([]);
+
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     const fetchGames = async () => {
@@ -71,6 +74,27 @@ export default function Admin() {
             fetchGames();
         } catch (err) {
             setMessage('❌ ' + (err.response?.data?.error || 'Erro ao encerrar bolão'));
+        }
+    };
+
+    const fetchAllBets = async () => {
+        try {
+            const res = await axios.post(`${apiUrl}/admin/all-bets`, { password });
+            setAllBets(res.data);
+            setMessage('✅ Palpites carregados com sucesso!');
+        } catch (err) {
+            setMessage('❌ ' + (err.response?.data?.error || 'Senha incorreta para carregar palpites'));
+        }
+    };
+
+    const handleReset = async () => {
+        if (!window.confirm("CUIDADO: Tem certeza absoluta que quer deletar todo o histórico de apostas e jogos?")) return;
+        try {
+            const res = await axios.post(`${apiUrl}/admin/reset`, { password });
+            setMessage('🔥 ' + res.data.message);
+            fetchGames();
+        } catch (err) {
+            setMessage('❌ ' + (err.response?.data?.error || 'Erro ao resetar sistema'));
         }
     };
 
@@ -143,6 +167,53 @@ export default function Admin() {
                         </div>
                         <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#ef4444', boxShadow: 'none' }}>Finalizar e Pagar Pix</button>
                     </form>
+                </div>
+
+                {/* HISTÓRICO DE PALPITES */}
+                <div className="glass-panel" style={{ gridColumn: '1 / -1' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                        <h3 style={{ color: 'var(--primary)' }}>📋 Todos os Palpites Registrados</h3>
+                        <button onClick={fetchAllBets} className="btn" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Carregar / Atualizar Palpites</button>
+                    </div>
+                    {allBets.length > 0 ? (
+                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-muted)' }}>
+                                        <th style={{ padding: '0.5rem' }}>Data</th>
+                                        <th style={{ padding: '0.5rem' }}>Apostador</th>
+                                        <th style={{ padding: '0.5rem' }}>Jogo</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Palpite</th>
+                                        <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allBets.map(bet => (
+                                        <tr key={bet.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <td style={{ padding: '0.5rem', fontSize: '0.8rem' }}>{new Date(bet.criado_em).toLocaleString('pt-BR')}</td>
+                                            <td style={{ padding: '0.5rem' }}>{bet.nome_completo}</td>
+                                            <td style={{ padding: '0.5rem' }}>{bet.time_casa} x {bet.time_fora}</td>
+                                            <td style={{ padding: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', textAlign: 'center' }}>{bet.gols_casa} x {bet.gols_fora}</td>
+                                            <td style={{ padding: '0.5rem', color: bet.status_pagamento === 'pendente' ? '#f59e0b' : '#10b981', fontWeight: 'bold', fontSize: '0.8rem', textAlign: 'center' }}>
+                                                {bet.status_pagamento === 'pendente' ? '⏳ PENDENTE' : '✅ APROVADO'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <p style={{ color: 'var(--text-muted)' }}>Digite a Senha Mestra acima e clique no botão para carregar os palpites.</p>
+                    )}
+                </div>
+
+                {/* ZONA DE PERIGO */}
+                <div className="glass-panel" style={{ border: '1px solid #ef4444', animation: 'glowPulse 4s infinite', gridColumn: '1 / -1' }}>
+                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem', textAlign: 'center' }}>⚠️ Zona de Perigo (Reset do Sistema)</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'center' }}>Atenção: Isso apagará TODOS os jogos e TODAS as apostas do banco de dados permanentemente. Ideal para reiniciar a temporada.</p>
+                    <button onClick={handleReset} className="btn" style={{ background: 'transparent', border: '2px solid #ef4444', color: '#ef4444', boxShadow: 'none' }}>
+                        Zerar Sistema Inteiro
+                    </button>
                 </div>
             </div>
         </div>

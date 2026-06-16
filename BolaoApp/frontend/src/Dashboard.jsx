@@ -6,7 +6,6 @@ import Chat from './Chat';
 export default function Dashboard({ user, setUser }) {
   const [games, setGames] = useState([]);
   const [myBets, setMyBets] = useState([]);
-  const [poolTotal, setPoolTotal] = useState(0);
   const [winners, setWinners] = useState([]);
   
   // Modal states
@@ -27,9 +26,6 @@ export default function Dashboard({ user, setUser }) {
       
       const resBets = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/my-bets'), { headers: { Authorization: `Bearer ${token}` } });
       setMyBets(resBets.data);
-
-      const resPool = await axios.get(((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/pool-total'), { headers: { Authorization: `Bearer ${token}` } });
-      setPoolTotal(resPool.data.total);
 
       // Busca ganhadores do primeiro jogo (se finalizado)
       if (resGames.data.length > 0 && resGames.data[0].status === 'finalizado') {
@@ -127,16 +123,17 @@ export default function Dashboard({ user, setUser }) {
           <button onClick={logout} style={{background:'transparent', border:'1px solid var(--text-muted)', padding:'0.5rem 1rem', borderRadius:'8px', color:'white', cursor:'pointer'}}>Sair 🚪</button>
         </div>
 
-        <div className="pool-total">
-          <p>Prêmio Acumulado 💰</p>
-          <h2>R$ {Number(poolTotal).toFixed(2).replace('.', ',')}</h2>
-        </div>
-
         <h3 style={{marginBottom: '1.5rem'}}>🔥 Aposta Oficial</h3>
         <div className="games-grid">
           {games.map(game => (
             <div key={game.id} className="glass-panel game-card">
-              <p style={{color: 'var(--primary)', fontWeight: '600', marginBottom: '1rem'}}>📅 {new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <p style={{color: 'var(--primary)', fontWeight: '600'}}>📅 {new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
+                <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.5rem 1rem', borderRadius: '8px', textAlign: 'right' }}>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.2rem', fontWeight: 'bold' }}>Prêmio Acumulado 💰</p>
+                  <strong style={{ fontSize: '1.2rem', color: '#fbbf24' }}>R$ {Number(game.prize_pool || 0).toFixed(2).replace('.', ',')}</strong>
+                </div>
+              </div>
               
               <div className="matchup">
                 <span><Flag teamName={game.time_casa} /> {game.time_casa} {game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_casa_real}</span> : ''}</span>
@@ -152,7 +149,7 @@ export default function Dashboard({ user, setUser }) {
                 <div style={{marginTop: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '12px'}}>
                   <h3 style={{color: '#10b981', marginBottom: '1rem'}}>🏁 Fim de Jogo!</h3>
                   <p style={{color: 'var(--text-main)', marginBottom: '1rem'}}>
-                    {winners.length > 0 ? `🎊 Os ganhadores vão dividir os R$ ${poolTotal.toFixed(2)}!` : '💔 Ninguém acertou o placar exato desta vez!'}
+                    {winners.length > 0 ? `🎊 Os ganhadores vão dividir os R$ ${Number(game.prize_pool || 0).toFixed(2)}!` : '💔 Ninguém acertou o placar exato desta vez!'}
                   </p>
                   {winners.map((w, i) => (
                     <div key={i} style={{fontWeight: 'bold', color: 'var(--primary)', fontSize: '1.2rem', margin: '0.5rem 0'}}>
