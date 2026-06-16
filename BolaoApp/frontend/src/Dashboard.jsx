@@ -117,43 +117,43 @@ export default function Dashboard({ user, setUser }) {
       <div className="main-content">
         <div className="header">
           <div>
-            <h2>Olá, {user.nome}! 👋</h2>
-            <p style={{color: 'var(--text-muted)'}}>Faça o seu palpite antes do prazo final ⏳</p>
+            <h2 style={{ fontWeight: '700' }}>Olá, {user.nome}</h2>
+            <p style={{color: 'var(--text-muted)'}}>Faça o seu palpite antes do prazo final.</p>
           </div>
-          <button onClick={logout} style={{background:'transparent', border:'1px solid var(--text-muted)', padding:'0.5rem 1rem', borderRadius:'8px', color:'white', cursor:'pointer'}}>Sair 🚪</button>
+          <button onClick={logout} className="btn-outline" style={{padding:'0.5rem 1rem', borderRadius:'8px', cursor:'pointer'}}>Sair</button>
         </div>
 
-        <h3 style={{marginBottom: '1.5rem'}}>🔥 Aposta Oficial</h3>
+        <h3 style={{marginBottom: '1.5rem', fontWeight: '600'}}>Apostas Oficiais</h3>
         <div className="games-grid">
           {games.map(game => (
             <div key={game.id} className="glass-panel game-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <p style={{color: 'var(--primary)', fontWeight: '600'}}>📅 {new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
-                <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '0.5rem 1rem', borderRadius: '8px', textAlign: 'right' }}>
-                  <p style={{ fontSize: '0.7rem', color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.2rem', fontWeight: 'bold' }}>Prêmio Acumulado 💰</p>
-                  <strong style={{ fontSize: '1.2rem', color: '#fbbf24' }}>R$ {Number(game.prize_pool || 0).toFixed(2).replace('.', ',')}</strong>
+                <p style={{color: 'var(--primary)', fontWeight: '600'}}>{new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.2rem', fontWeight: '600' }}>Prêmio Acumulado</p>
+                  <strong style={{ fontSize: '1.25rem', color: 'var(--primary)' }}>R$ {Number(game.prize_pool || 0).toFixed(2).replace('.', ',')}</strong>
                 </div>
               </div>
               
               <div className="matchup">
-                <span><Flag teamName={game.time_casa} /> {game.time_casa} {game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_casa_real}</span> : ''}</span>
-                <span className="vs">💥</span>
-                <span>{game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_fora_real}</span> : ''} {game.time_fora} <Flag teamName={game.time_fora} /></span>
+                <span style={{ display: 'flex', alignItems: 'center' }}><Flag teamName={game.time_casa} /> <span style={{ marginLeft: '0.5rem' }}>{game.time_casa}</span> {game.status === 'finalizado' ? <span style={{color:'var(--primary)', marginLeft: '0.5rem'}}>{game.gols_casa_real}</span> : ''}</span>
+                <span className="vs">VS</span>
+                <span style={{ display: 'flex', alignItems: 'center' }}>{game.status === 'finalizado' ? <span style={{color:'var(--primary)', marginRight: '0.5rem'}}>{game.gols_fora_real}</span> : ''} <span style={{ marginRight: '0.5rem' }}>{game.time_fora}</span> <Flag teamName={game.time_fora} /></span>
               </div>
 
               {game.status !== 'finalizado' ? (
                 <button className="btn" onClick={() => openBetModal(game.id)}>
-                  Dar Meu Palpite (R$ 10,00) 💸
+                  Dar Meu Palpite (R$ 10,00)
                 </button>
               ) : (
-                <div style={{marginTop: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '12px'}}>
-                  <h3 style={{color: '#10b981', marginBottom: '1rem'}}>🏁 Fim de Jogo!</h3>
-                  <p style={{color: 'var(--text-main)', marginBottom: '1rem'}}>
-                    {winners.length > 0 ? `🎊 Os ganhadores vão dividir os R$ ${Number(game.prize_pool || 0).toFixed(2)}!` : '💔 Ninguém acertou o placar exato desta vez!'}
+                <div style={{marginTop: '1.5rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--primary)', borderRadius: '8px'}}>
+                  <h3 style={{color: 'var(--primary)', marginBottom: '1rem', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px'}}>Partida Encerrada</h3>
+                  <p style={{color: 'var(--text-main)', marginBottom: '1rem', fontSize: '0.875rem'}}>
+                    {winners.length > 0 ? `Os ganhadores dividirão o prêmio de R$ ${Number(game.prize_pool || 0).toFixed(2)}.` : 'Ninguém acertou o placar exato desta vez.'}
                   </p>
                   {winners.map((w, i) => (
-                    <div key={i} style={{fontWeight: 'bold', color: 'var(--primary)', fontSize: '1.2rem', margin: '0.5rem 0'}}>
-                      🏆 {w.nome_completo}
+                    <div key={i} style={{fontWeight: '600', color: 'var(--text-main)', margin: '0.5rem 0'}}>
+                      {w.nome_completo}
                     </div>
                   ))}
                 </div>
@@ -164,18 +164,20 @@ export default function Dashboard({ user, setUser }) {
 
         {myBets.length > 0 && (
           <div className="my-bets">
-            <h3 style={{marginBottom: '1rem'}}>📋 Meus Palpites Registrados</h3>
+            <h3 style={{marginBottom: '1rem', fontWeight: '600'}}>Meus Palpites Registrados</h3>
             <div className="glass-panel" style={{padding: '0'}}>
               {myBets.map(bet => (
                 <div key={bet.id} className="bet-item">
                   <div>
-                    <strong style={{color:'var(--primary)'}}>
-                      <Flag teamName={bet.time_casa} /> {bet.time_casa} {bet.gols_casa} x {bet.gols_fora} {bet.time_fora} <Flag teamName={bet.time_fora} />
+                    <strong style={{ display: 'flex', alignItems: 'center' }}>
+                      <Flag teamName={bet.time_casa} /> <span style={{ margin: '0 0.5rem' }}>{bet.time_casa}</span> {bet.gols_casa} <span style={{ margin: '0 0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>x</span> {bet.gols_fora} <span style={{ margin: '0 0.5rem' }}>{bet.time_fora}</span> <Flag teamName={bet.time_fora} />
                     </strong>
-                    <div style={{fontSize:'0.8rem', color:'var(--text-muted)', marginTop:'0.2rem'}}>⌚ {new Date(bet.criado_em).toLocaleString('pt-BR')}</div>
+                    <div style={{fontSize:'0.75rem', color:'var(--text-muted)', marginTop:'0.5rem'}}>{new Date(bet.criado_em).toLocaleString('pt-BR')}</div>
                   </div>
-                  <div style={{color: bet.status_pagamento === 'pendente' ? '#f59e0b' : '#10b981', fontWeight: 'bold', fontSize:'0.9rem'}}>
-                    {bet.status_pagamento === 'pendente' ? '⏳ PENDENTE' : '✅ APROVADO'}
+                  <div>
+                    {bet.status_pagamento === 'pendente' 
+                      ? <span className="badge badge-warning">Pendente</span> 
+                      : <span className="badge badge-success">Aprovado</span>}
                   </div>
                 </div>
               ))}
@@ -192,37 +194,37 @@ export default function Dashboard({ user, setUser }) {
           <div className="glass-panel modal-content" onClick={e => e.stopPropagation()}>
             {!qrCodeData ? (
               <>
-                <h2 style={{color: 'var(--primary)'}}>🤔 Qual o seu palpite?</h2>
-                <p style={{fontSize:'0.9rem', color: 'var(--text-muted)', marginTop:'0.5rem'}}>Insira o placar exato para confirmar sua aposta.</p>
+                <h2 style={{color: 'var(--text-main)', fontSize: '1.25rem', marginBottom: '0.5rem'}}>Qual o seu palpite?</h2>
+                <p style={{fontSize:'0.875rem', color: 'var(--text-muted)'}}>Insira o placar exato para confirmar sua aposta.</p>
                 
-                {modalError && <p style={{color: '#ef4444', marginTop: '1rem'}}>⚠️ {modalError}</p>}
+                {modalError && <p style={{color: '#ef4444', marginTop: '1rem', fontSize: '0.875rem'}}>{modalError}</p>}
                 
                 <div className="score-inputs">
                   <input type="number" min="0" value={golsCasa} onChange={e => setGolsCasa(e.target.value)} />
-                  <span style={{fontSize:'1.5rem'}}>✖️</span>
+                  <span style={{fontSize:'1.5rem', color: 'var(--text-muted)'}}>X</span>
                   <input type="number" min="0" value={golsFora} onChange={e => setGolsFora(e.target.value)} />
                 </div>
                 
                 <button className="btn" onClick={handleBet} disabled={loading}>
-                  {loading ? 'Gerando QR Code... ⏳' : 'Confirmar Pagamento R$ 10 🚀'}
+                  {loading ? 'Gerando QR Code...' : 'Confirmar Pagamento (R$ 10,00)'}
                 </button>
               </>
             ) : (
               <>
-                <h2 style={{color: '#10b981'}}>✅ Palpite Registrado!</h2>
-                <p style={{fontSize:'0.9rem', color: 'var(--text-muted)', marginTop:'0.5rem'}}>
+                <h2 style={{color: 'var(--primary)', fontSize: '1.25rem', marginBottom: '0.5rem'}}>Palpite Registrado</h2>
+                <p style={{fontSize:'0.875rem', color: 'var(--text-muted)'}}>
                   Abra o app do seu banco e escaneie o código abaixo para confirmar sua aposta de R$ 10,00.
                 </p>
                 
                 <img src={qrCodeData} alt="QR Code PIX" className="qr-code" />
                 
-                <p style={{fontSize: '0.8rem'}}>Ou copie a chave PIX:</p>
+                <p style={{fontSize: '0.875rem', color: 'var(--text-main)'}}>Ou copie a chave PIX:</p>
                 <div className="pix-key-display">
                   {pixKey}
                 </div>
                 
-                <button className="btn" style={{background: 'transparent', border: '1px solid var(--text-muted)', color: 'white', animation: 'none', boxShadow: 'none'}} onClick={() => setActiveGameId(null)}>
-                  Fechar ✖️
+                <button className="btn btn-outline" onClick={() => setActiveGameId(null)}>
+                  Fechar
                 </button>
               </>
             )}

@@ -100,13 +100,13 @@ export default function Admin() {
 
     return (
         <div className="container" style={{ flexDirection: 'column', maxWidth: '800px', alignItems: 'center' }}>
-            <h1 style={{ color: 'var(--primary)', marginBottom: '1rem', textAlign: 'center' }}>⚙️ Painel de Administração</h1>
+            <h1 style={{ color: 'var(--text-main)', marginBottom: '1rem', textAlign: 'center' }}>Painel de Administração</h1>
             <div style={{ width: '100%', marginBottom: '2rem' }}>
-                <a href="/dashboard" style={{ color: 'var(--text-muted)' }}>⬅️ Voltar ao Início</a>
+                <a href="/dashboard" style={{ color: 'var(--primary)' }}>Voltar ao Início</a>
             </div>
 
             <div className="glass-panel" style={{ width: '100%', marginBottom: '2rem' }}>
-                <h3 style={{ marginBottom: '1rem' }}>🔑 Autenticação de Admin</h3>
+                <h3 style={{ marginBottom: '1rem', color: 'var(--text-main)' }}>Autenticação de Administrador</h3>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                     <input type="password" placeholder="Digite a Senha Mestra" value={password} onChange={e => setPassword(e.target.value)} required />
                 </div>
@@ -116,7 +116,7 @@ export default function Admin() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', width: '100%' }}>
                 {/* CRIAR JOGO */}
                 <div className="glass-panel">
-                    <h3 style={{ color: '#10b981', marginBottom: '1.5rem' }}>➕ Adicionar Novo Jogo</h3>
+                    <h3 style={{ color: '#10b981', marginBottom: '1.5rem' }}>Adicionar Novo Jogo</h3>
                     <form onSubmit={handleCreateGame}>
                         <div className="input-group">
                             <label>Time da Casa</label>
@@ -130,13 +130,13 @@ export default function Admin() {
                             <label>Data e Hora do Jogo</label>
                             <input type="datetime-local" value={newDataJogo} onChange={e => setNewDataJogo(e.target.value)} required />
                         </div>
-                        <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#10b981', boxShadow: 'none' }}>Cadastrar Jogo</button>
+                        <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#10b981' }}>Cadastrar Jogo</button>
                     </form>
                 </div>
 
                 {/* FINALIZAR JOGO */}
                 <div className="glass-panel">
-                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem' }}>🏁 Encerrar Jogo</h3>
+                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem' }}>Encerrar Partida</h3>
                     <form onSubmit={handleFinish}>
                         <div className="input-group">
                             <label>Selecione o Jogo Pendente</label>
@@ -144,7 +144,6 @@ export default function Admin() {
                                 value={finishGameId} 
                                 onChange={e => setFinishGameId(e.target.value)} 
                                 required
-                                style={{ width: '100%', padding: '1rem', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--glass-border)', borderRadius: '12px', color: 'white', fontSize: '1rem' }}
                             >
                                 <option value="">Selecione...</option>
                                 {games.filter(g => g.status !== 'finalizado').map(g => (
@@ -157,29 +156,29 @@ export default function Admin() {
                         <div className="input-group" style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'center', marginTop: '1.5rem' }}>
                             <div style={{ textAlign: 'center' }}>
                                 <label>Gols Casa</label>
-                                <input type="number" min="0" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px' }} value={golsCasa} onChange={e => setGolsCasa(e.target.value)} required />
+                                <input type="number" min="0" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px', padding: '0.5rem' }} value={golsCasa} onChange={e => setGolsCasa(e.target.value)} required />
                             </div>
-                            <span style={{ fontSize: '2rem', marginTop: '1.5rem' }}>X</span>
+                            <span style={{ fontSize: '1.5rem', marginTop: '1.5rem', color: 'var(--text-muted)' }}>X</span>
                             <div style={{ textAlign: 'center' }}>
                                 <label>Gols Fora</label>
-                                <input type="number" min="0" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px' }} value={golsFora} onChange={e => setGolsFora(e.target.value)} required />
+                                <input type="number" min="0" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px', padding: '0.5rem' }} value={golsFora} onChange={e => setGolsFora(e.target.value)} required />
                             </div>
                         </div>
-                        <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#ef4444', boxShadow: 'none' }}>Finalizar e Pagar Pix</button>
+                        <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#ef4444' }}>Finalizar e Pagar Pix</button>
                     </form>
                 </div>
 
                 {/* HISTÓRICO DE PALPITES */}
                 <div className="glass-panel" style={{ gridColumn: '1 / -1' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-                        <h3 style={{ color: 'var(--primary)' }}>📋 Todos os Palpites Registrados</h3>
-                        <button onClick={fetchAllBets} className="btn" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Carregar / Atualizar Palpites</button>
+                        <h3 style={{ color: 'var(--primary)' }}>Histórico Geral de Palpites</h3>
+                        <button onClick={fetchAllBets} className="btn-outline" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.875rem', borderRadius: '6px' }}>Carregar Dados</button>
                     </div>
                     {allBets.length > 0 ? (
                         <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-muted)' }}>
+                                    <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>
                                         <th style={{ padding: '0.5rem' }}>Data</th>
                                         <th style={{ padding: '0.5rem' }}>Apostador</th>
                                         <th style={{ padding: '0.5rem' }}>Jogo</th>
@@ -189,13 +188,15 @@ export default function Admin() {
                                 </thead>
                                 <tbody>
                                     {allBets.map(bet => (
-                                        <tr key={bet.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                            <td style={{ padding: '0.5rem', fontSize: '0.8rem' }}>{new Date(bet.criado_em).toLocaleString('pt-BR')}</td>
-                                            <td style={{ padding: '0.5rem' }}>{bet.nome_completo}</td>
-                                            <td style={{ padding: '0.5rem' }}>{bet.time_casa} x {bet.time_fora}</td>
-                                            <td style={{ padding: '0.5rem', color: 'var(--primary)', fontWeight: 'bold', textAlign: 'center' }}>{bet.gols_casa} x {bet.gols_fora}</td>
-                                            <td style={{ padding: '0.5rem', color: bet.status_pagamento === 'pendente' ? '#f59e0b' : '#10b981', fontWeight: 'bold', fontSize: '0.8rem', textAlign: 'center' }}>
-                                                {bet.status_pagamento === 'pendente' ? '⏳ PENDENTE' : '✅ APROVADO'}
+                                        <tr key={bet.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
+                                            <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.875rem' }}>{new Date(bet.criado_em).toLocaleString('pt-BR')}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem' }}>{bet.nome_completo}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem' }}>{bet.time_casa} x {bet.time_fora}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem', color: 'var(--primary)', fontWeight: 'bold', textAlign: 'center' }}>{bet.gols_casa} x {bet.gols_fora}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
+                                                {bet.status_pagamento === 'pendente' 
+                                                    ? <span className="badge badge-warning">Pendente</span> 
+                                                    : <span className="badge badge-success">Aprovado</span>}
                                             </td>
                                         </tr>
                                     ))}
@@ -208,11 +209,11 @@ export default function Admin() {
                 </div>
 
                 {/* ZONA DE PERIGO */}
-                <div className="glass-panel" style={{ border: '1px solid #ef4444', animation: 'glowPulse 4s infinite', gridColumn: '1 / -1' }}>
-                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem', textAlign: 'center' }}>⚠️ Zona de Perigo (Reset do Sistema)</h3>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'center' }}>Atenção: Isso apagará TODOS os jogos e TODAS as apostas do banco de dados permanentemente. Ideal para reiniciar a temporada.</p>
-                    <button onClick={handleReset} className="btn" style={{ background: 'transparent', border: '2px solid #ef4444', color: '#ef4444', boxShadow: 'none' }}>
-                        Zerar Sistema Inteiro
+                <div className="glass-panel" style={{ border: '1px solid #ef4444', gridColumn: '1 / -1' }}>
+                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem', textAlign: 'center', textTransform: 'uppercase' }}>Zona de Perigo</h3>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'center' }}>Atenção: Isso apagará todos os jogos e apostas permanentemente.</p>
+                    <button onClick={handleReset} className="btn-outline" style={{ border: '1px solid #ef4444', color: '#ef4444', display: 'block', margin: '0 auto', width: 'auto', padding: '0.5rem 2rem' }}>
+                        Zerar Banco de Dados
                     </button>
                 </div>
             </div>
