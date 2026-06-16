@@ -1,64 +1,149 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 export default function Admin() {
     const [password, setPassword] = useState('');
-    const [golsCasa, setGolsCasa] = useState('');
-    const [golsFora, setGolsFora] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
-    // ID do jogo fixo (Brasil x Haiti)
-    const gameId = 1;
+    // Estado dos jogos
+    const [games, setGames] = useState([]);
+    
+    // Novo Jogo
+    const [newTimeCasa, setNewTimeCasa] = useState('');
+    const [newTimeFora, setNewTimeFora] = useState('');
+    const [newDataJogo, setNewDataJogo] = useState('');
+
+    // Encerrar Jogo
+    const [finishGameId, setFinishGameId] = useState('');
+    const [golsCasa, setGolsCasa] = useState('');
+    const [golsFora, setGolsFora] = useState('');
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+    const fetchGames = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${apiUrl}/games`, { headers: { Authorization: `Bearer ${token}` } });
+            setGames(res.data);
+            if (res.data.length > 0 && !finishGameId) {
+                const pendingGames = res.data.filter(g => g.status !== 'finalizado');
+                if (pendingGames.length > 0) setFinishGameId(pendingGames[0].id);
+            }
+        } catch (err) {
+            console.error("Erro ao buscar jogos no admin");
+        }
+    };
+
+    useEffect(() => {
+        fetchGames();
+    }, []);
+
+    const handleCreateGame = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.post(`${apiUrl}/admin/games`, {
+                password,
+                time_casa: newTimeCasa,
+                time_fora: newTimeFora,
+                data_jogo: newDataJogo
+            });
+            setMessage('✅ ' + res.data.message);
+            setNewTimeCasa(''); setNewTimeFora(''); setNewDataJogo('');
+            fetchGames();
+        } catch (err) {
+            setMessage('❌ ' + (err.response?.data?.error || 'Erro ao criar jogo'));
+        }
+    };
 
     const handleFinish = async (e) => {
         e.preventDefault();
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const res = await axios.post(`${apiUrl}/admin/finish`, {
                 password,
-                game_id: gameId,
+                game_id: finishGameId,
                 gols_casa: parseInt(golsCasa),
                 gols_fora: parseInt(golsFora)
             });
-            setMessage(res.data.message);
-            setTimeout(() => navigate('/dashboard'), 2000);
+            setMessage('🏆 ' + res.data.message);
+            setGolsCasa(''); setGolsFora('');
+            fetchGames();
         } catch (err) {
-            setMessage(err.response?.data?.error || 'Erro ao encerrar bolão');
+            setMessage('❌ ' + (err.response?.data?.error || 'Erro ao encerrar bolão'));
         }
     };
 
     return (
-        <div className="auth-container">
-            <div className="glass-panel auth-card">
-                <h1>Painel do Admin</h1>
-                <p style={{ color: 'var(--primary)', marginBottom: '2rem' }}>Encerrar o Bolão</p>
+        <div className="container" style={{ flexDirection: 'column', maxWidth: '800px', alignItems: 'center' }}>
+            <h1 style={{ color: 'var(--primary)', marginBottom: '1rem', textAlign: 'center' }}>⚙️ Painel de Administração</h1>
+            <div style={{ width: '100%', marginBottom: '2rem' }}>
+                <a href="/dashboard" style={{ color: 'var(--text-muted)' }}>⬅️ Voltar ao Início</a>
+            </div>
 
-                <form onSubmit={handleFinish}>
-                    <div className="input-group">
-                        <label>Senha Mestra</label>
-                        <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-                    </div>
-                    <div className="input-group" style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <label>Gols Brasil</label>
-                            <input type="number" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px' }} value={golsCasa} onChange={e => setGolsCasa(e.target.value)} required />
-                        </div>
-                        <span style={{ fontSize: '2rem', marginTop: '1.5rem' }}>X</span>
-                        <div style={{ textAlign: 'center' }}>
-                            <label>Gols Haiti</label>
-                            <input type="number" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px' }} value={golsFora} onChange={e => setGolsFora(e.target.value)} required />
-                        </div>
-                    </div>
-                    <button type="submit" className="btn" style={{ marginTop: '1rem' }}>Finalizar Jogo e Mostrar Ganhadores</button>
-                </form>
+            <div className="glass-panel" style={{ width: '100%', marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem' }}>🔑 Autenticação de Admin</h3>
+                <div className="input-group" style={{ marginBottom: 0 }}>
+                    <input type="password" placeholder="Digite a Senha Mestra" value={password} onChange={e => setPassword(e.target.value)} required />
+                </div>
+                {message && <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>{message}</p>}
+            </div>
 
-                {message && <p style={{ marginTop: '1rem', color: message.includes('sucesso') ? '#10b981' : '#ef4444' }}>{message}</p>}
-                
-                <p style={{ marginTop: '2rem' }}>
-                    <a href="/dashboard" style={{ color: 'var(--text-muted)' }}>Voltar ao Início</a>
-                </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', width: '100%' }}>
+                {/* CRIAR JOGO */}
+                <div className="glass-panel">
+                    <h3 style={{ color: '#10b981', marginBottom: '1.5rem' }}>➕ Adicionar Novo Jogo</h3>
+                    <form onSubmit={handleCreateGame}>
+                        <div className="input-group">
+                            <label>Time da Casa</label>
+                            <input type="text" placeholder="Ex: Brasil" value={newTimeCasa} onChange={e => setNewTimeCasa(e.target.value)} required />
+                        </div>
+                        <div className="input-group">
+                            <label>Time de Fora</label>
+                            <input type="text" placeholder="Ex: Argentina" value={newTimeFora} onChange={e => setNewTimeFora(e.target.value)} required />
+                        </div>
+                        <div className="input-group">
+                            <label>Data e Hora do Jogo</label>
+                            <input type="datetime-local" value={newDataJogo} onChange={e => setNewDataJogo(e.target.value)} required />
+                        </div>
+                        <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#10b981', boxShadow: 'none' }}>Cadastrar Jogo</button>
+                    </form>
+                </div>
+
+                {/* FINALIZAR JOGO */}
+                <div className="glass-panel">
+                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem' }}>🏁 Encerrar Jogo</h3>
+                    <form onSubmit={handleFinish}>
+                        <div className="input-group">
+                            <label>Selecione o Jogo Pendente</label>
+                            <select 
+                                value={finishGameId} 
+                                onChange={e => setFinishGameId(e.target.value)} 
+                                required
+                                style={{ width: '100%', padding: '1rem', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid var(--glass-border)', borderRadius: '12px', color: 'white', fontSize: '1rem' }}
+                            >
+                                <option value="">Selecione...</option>
+                                {games.filter(g => g.status !== 'finalizado').map(g => (
+                                    <option key={g.id} value={g.id}>
+                                        {g.time_casa} x {g.time_fora} ({new Date(g.data_jogo).toLocaleDateString('pt-BR')})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="input-group" style={{ display: 'flex', gap: '1rem', alignItems: 'center', justifyContent: 'center', marginTop: '1.5rem' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <label>Gols Casa</label>
+                                <input type="number" min="0" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px' }} value={golsCasa} onChange={e => setGolsCasa(e.target.value)} required />
+                            </div>
+                            <span style={{ fontSize: '2rem', marginTop: '1.5rem' }}>X</span>
+                            <div style={{ textAlign: 'center' }}>
+                                <label>Gols Fora</label>
+                                <input type="number" min="0" style={{ textAlign: 'center', fontSize: '1.5rem', width: '80px' }} value={golsFora} onChange={e => setGolsFora(e.target.value)} required />
+                            </div>
+                        </div>
+                        <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#ef4444', boxShadow: 'none' }}>Finalizar e Pagar Pix</button>
+                    </form>
+                </div>
             </div>
         </div>
     );

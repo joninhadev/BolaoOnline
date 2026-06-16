@@ -91,9 +91,12 @@ app.post('/bet', authenticateToken, async (req, res) => {
         const user_id = req.user.id;
         const valor_aposta = 10.00;
 
-        const deadline = new Date('2026-06-19T21:25:00-03:00');
-        if (new Date() > deadline) {
-            return res.status(400).json({ error: 'Tempo esgotado!' });
+        const [gameRows] = await pool.query('SELECT data_jogo, status FROM games WHERE id = ?', [game_id]);
+        if (gameRows.length === 0) return res.status(404).json({ error: 'Jogo não encontrado!' });
+        if (gameRows[0].status === 'finalizado') return res.status(400).json({ error: 'Este jogo já encerrou!' });
+
+        if (new Date() > new Date(gameRows[0].data_jogo)) {
+            return res.status(400).json({ error: 'Tempo esgotado para este jogo!' });
         }
 
         const [result] = await pool.query(
@@ -185,6 +188,23 @@ app.get('/pool-total', authenticateToken, async (req, res) => {
 // ==========================================
 // ROTAS DE ADMINISTRAÇÃO E GANHADORES
 // ==========================================
+app.post('/admin/games', async (req, res) => {
+    try {
+        const { password, time_casa, time_fora, data_jogo } = req.body;
+        const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+        if (password !== adminPass) return res.status(403).json({ error: 'Senha incorreta!' });
+
+        await pool.query(
+            'INSERT INTO games (time_casa, time_fora, data_jogo, status) VALUES (?, ?, ?, "agendado")',
+            [time_casa, time_fora, data_jogo]
+        );
+        io.emit('gameFinished', {}); // trigger para atualizar frontends abertos
+        res.json({ message: 'Jogo criado com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao criar jogo.' });
+    }
+});
+
 app.post('/admin/finish', async (req, res) => {
     try {
         const { password, game_id, gols_casa, gols_fora } = req.body;
