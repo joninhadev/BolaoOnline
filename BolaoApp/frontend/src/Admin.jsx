@@ -52,11 +52,12 @@ export default function Admin() {
     const handleCreateGame = async (e) => {
         e.preventDefault();
         try {
+            const dataJogoUTC = new Date(newDataJogo).toISOString();
             const res = await axios.post(`${apiUrl}/admin/games`, {
                 password,
                 time_casa: newTimeCasa,
                 time_fora: newTimeFora,
-                data_jogo: newDataJogo
+                data_jogo: dataJogoUTC
             });
             setMessage('✅ ' + res.data.message);
             setNewTimeCasa(''); setNewTimeFora(''); setNewDataJogo('');
@@ -105,11 +106,12 @@ export default function Admin() {
     const handleEditGame = async (e) => {
         e.preventDefault();
         try {
+            const dataJogoUTC = new Date(editDataJogo).toISOString();
             const res = await axios.put(`${apiUrl}/admin/games/${editGameId}`, {
                 password,
                 time_casa: editTimeCasa,
                 time_fora: editTimeFora,
-                data_jogo: editDataJogo
+                data_jogo: dataJogoUTC
             });
             setMessage('✅ ' + res.data.message);
             setEditGameId(''); setEditTimeCasa(''); setEditTimeFora(''); setEditDataJogo('');
