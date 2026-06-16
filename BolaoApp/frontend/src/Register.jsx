@@ -40,6 +40,12 @@ export default function Register() {
             <label>Senha</label>
             <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} required />
           </div>
+
+          <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--border-light)', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '0.5rem' }}>Termos e Condições</strong>
+            Ao se cadastrar, você concorda e está ciente de que o prêmio acumulado exibido em cada jogo já reflete o desconto da taxa administrativa de <strong>20%</strong> referente ao gerenciamento da plataforma.
+          </div>
+
           <button type="submit" className="btn">Cadastrar</button>
         </form>
 

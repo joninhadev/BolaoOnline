@@ -105,9 +105,10 @@ app.post('/bet', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'Tempo esgotado para este jogo!' });
         }
 
+        const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'Desconhecido';
         const [result] = await pool.query(
-            'INSERT INTO bets (user_id, game_id, valor, gols_casa, gols_fora, status_pagamento) VALUES (?, ?, ?, ?, ?, "pendente")',
-            [user_id, game_id, valor_aposta, gols_casa, gols_fora]
+            'INSERT INTO bets (user_id, game_id, valor, gols_casa, gols_fora, status_pagamento, ip_address) VALUES (?, ?, ?, ?, ?, "pendente", ?)',
+            [user_id, game_id, valor_aposta, gols_casa, gols_fora, ip_address]
         );
         const aposta_id = result.insertId;
 
@@ -204,7 +205,7 @@ app.post('/admin/all-bets', async (req, res) => {
         if (password !== adminPass) return res.status(403).json({ error: 'Senha incorreta!' });
 
         const [bets] = await pool.query(`
-            SELECT b.id, b.gols_casa, b.gols_fora, b.valor, b.status_pagamento, b.criado_em, 
+            SELECT b.id, b.gols_casa, b.gols_fora, b.valor, b.status_pagamento, b.criado_em, b.ip_address,
                    u.nome_completo, g.time_casa, g.time_fora 
             FROM bets b 
             JOIN users u ON b.user_id = u.id 
@@ -214,6 +215,22 @@ app.post('/admin/all-bets', async (req, res) => {
         res.json(bets);
     } catch (error) {
         res.status(500).json({ error: 'Erro ao buscar histórico de palpites.' });
+    }
+});
+
+app.post('/admin/backup', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+        if (password !== adminPass) return res.status(403).json({ error: 'Senha incorreta!' });
+
+        const [users] = await pool.query('SELECT id, nome_completo, email, criado_em FROM users');
+        const [games] = await pool.query('SELECT * FROM games');
+        const [bets] = await pool.query('SELECT * FROM bets');
+
+        res.json({ users, games, bets });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao gerar backup.' });
     }
 });
 

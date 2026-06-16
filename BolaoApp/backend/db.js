@@ -49,11 +49,19 @@ async function initDB() {
                 game_id INT NOT NULL,
                 valor DECIMAL(10, 2) NOT NULL DEFAULT 10.00,
                 status_pagamento VARCHAR(50) DEFAULT 'pendente',
+                ip_address VARCHAR(100),
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id),
                 FOREIGN KEY (game_id) REFERENCES games(id)
             )
         `);
+
+        // Tenta adicionar a coluna caso a tabela já exista
+        try {
+            await connection.query('ALTER TABLE bets ADD COLUMN ip_address VARCHAR(100)');
+        } catch (e) {
+            // Se der erro, a coluna já existe
+        }
 
         console.log("✅ Tabelas do banco de dados verificadas/criadas com sucesso!");
         connection.release();

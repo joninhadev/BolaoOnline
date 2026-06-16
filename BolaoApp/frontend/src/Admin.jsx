@@ -142,6 +142,22 @@ export default function Admin() {
         }
     };
 
+    const handleBackup = async () => {
+        try {
+            const res = await axios.post(`${apiUrl}/admin/backup`, { password });
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res.data, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `backup_bolao_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dlAnchorElem);
+            dlAnchorElem.click();
+            document.body.removeChild(dlAnchorElem);
+            setMessage('✅ Backup (JSON) salvo com sucesso!');
+        } catch (err) {
+            setMessage('❌ ' + (err.response?.data?.error || 'Erro ao realizar backup'));
+        }
+    };
+
     return (
         <div className="container" style={{ flexDirection: 'column' }}>
             <h1 style={{ color: 'var(--text-main)', marginBottom: '1rem', textAlign: 'center' }}>Painel de Administração</h1>
@@ -260,6 +276,7 @@ export default function Admin() {
                                     <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>
                                         <th style={{ padding: '0.5rem' }}>Data</th>
                                         <th style={{ padding: '0.5rem' }}>Apostador</th>
+                                        <th style={{ padding: '0.5rem' }}>IP</th>
                                         <th style={{ padding: '0.5rem' }}>Jogo</th>
                                         <th style={{ padding: '0.5rem', textAlign: 'center' }}>Palpite</th>
                                         <th style={{ padding: '0.5rem', textAlign: 'center' }}>Status</th>
@@ -270,6 +287,7 @@ export default function Admin() {
                                         <tr key={bet.id} style={{ borderBottom: '1px solid var(--border-light)' }}>
                                             <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.875rem' }}>{new Date(bet.criado_em).toLocaleString('pt-BR')}</td>
                                             <td style={{ padding: '0.75rem 0.5rem' }}>{bet.nome_completo}</td>
+                                            <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{bet.ip_address || 'N/A'}</td>
                                             <td style={{ padding: '0.75rem 0.5rem' }}>{bet.time_casa} x {bet.time_fora}</td>
                                             <td style={{ padding: '0.75rem 0.5rem', color: 'var(--primary)', fontWeight: 'bold', textAlign: 'center' }}>{bet.gols_casa} x {bet.gols_fora}</td>
                                             <td style={{ padding: '0.75rem 0.5rem', textAlign: 'center' }}>
@@ -287,13 +305,23 @@ export default function Admin() {
                     )}
                 </div>
 
-                {/* ZONA DE PERIGO */}
+                {/* ZONA DE PERIGO E BACKUP */}
                 <div className="glass-panel" style={{ border: '1px solid #ef4444', gridColumn: '1 / -1' }}>
-                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem', textAlign: 'center', textTransform: 'uppercase' }}>Zona de Perigo</h3>
-                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', textAlign: 'center' }}>Atenção: Isso apagará todos os jogos e apostas permanentemente.</p>
-                    <button onClick={handleReset} className="btn-outline" style={{ border: '1px solid #ef4444', color: '#ef4444', display: 'block', margin: '0 auto', width: 'auto', padding: '0.5rem 2rem' }}>
-                        Zerar Banco de Dados
-                    </button>
+                    <h3 style={{ color: '#ef4444', marginBottom: '1.5rem', textAlign: 'center', textTransform: 'uppercase' }}>Segurança e Gerenciamento de Dados</h3>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center' }}>
+                        <div style={{ textAlign: 'center', flex: 1, minWidth: '250px' }}>
+                            <p style={{ color: 'var(--text-main)', marginBottom: '1rem' }}>Faça o download de todas as contas, jogos e palpites.</p>
+                            <button onClick={handleBackup} className="btn" style={{ background: '#10b981', display: 'block', margin: '0 auto', width: '100%', padding: '0.75rem' }}>
+                                Fazer Backup (JSON)
+                            </button>
+                        </div>
+                        <div style={{ textAlign: 'center', flex: 1, minWidth: '250px' }}>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>Atenção: Isso apagará tudo permanentemente.</p>
+                            <button onClick={handleReset} className="btn-outline" style={{ border: '1px solid #ef4444', color: '#ef4444', display: 'block', margin: '0 auto', width: '100%', padding: '0.75rem' }}>
+                                Zerar Banco de Dados
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
