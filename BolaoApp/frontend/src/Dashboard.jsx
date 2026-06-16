@@ -93,6 +93,17 @@ export default function Dashboard({ user, setUser }) {
     });
   }, []);
 
+  const getFlag = (teamName) => {
+    const flags = {
+      'Brasil': '🇧🇷', 'Haiti': '🇭🇹', 'Argentina': '🇦🇷', 'Alemanha': '🇩🇪',
+      'França': '🇫🇷', 'Espanha': '🇪🇸', 'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'Itália': '🇮🇹',
+      'Portugal': '🇵🇹', 'Uruguai': '🇺🇾', 'Colômbia': '🇨🇴', 'Chile': '🇨🇱',
+      'Holanda': '🇳🇱', 'Bélgica': '🇧🇪', 'Croácia': '🇭🇷', 'México': '🇲🇽',
+      'EUA': '🇺🇸', 'Japão': '🇯🇵', 'Coreia do Sul': '🇰🇷', 'Austrália': '🇦🇺'
+    };
+    return flags[teamName] || '⚽';
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('nome');
@@ -104,38 +115,38 @@ export default function Dashboard({ user, setUser }) {
       <div className="main-content">
         <div className="header">
           <div>
-            <h2>Olá, {user.nome}!</h2>
-            <p style={{color: 'var(--text-muted)'}}>Faça o seu palpite antes do prazo final.</p>
+            <h2>Olá, {user.nome}! 👋</h2>
+            <p style={{color: 'var(--text-muted)'}}>Faça o seu palpite antes do prazo final ⏳</p>
           </div>
-          <button onClick={logout} style={{background:'transparent', border:'1px solid var(--text-muted)', padding:'0.5rem 1rem', borderRadius:'8px', color:'white', cursor:'pointer'}}>Sair</button>
+          <button onClick={logout} style={{background:'transparent', border:'1px solid var(--text-muted)', padding:'0.5rem 1rem', borderRadius:'8px', color:'white', cursor:'pointer'}}>Sair 🚪</button>
         </div>
 
         <div className="pool-total">
-          <p>Prêmio Acumulado do Bolão</p>
+          <p>Prêmio Acumulado 💰</p>
           <h2>R$ {Number(poolTotal).toFixed(2).replace('.', ',')}</h2>
         </div>
 
-        <h3 style={{marginBottom: '1.5rem'}}>Aposta Oficial</h3>
+        <h3 style={{marginBottom: '1.5rem'}}>🔥 Aposta Oficial</h3>
         <div className="games-grid">
           {games.map(game => (
             <div key={game.id} className="glass-panel game-card">
-              <p style={{color: 'var(--primary)', fontWeight: '600', marginBottom: '1rem'}}>{new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
+              <p style={{color: 'var(--primary)', fontWeight: '600', marginBottom: '1rem'}}>📅 {new Date(game.data_jogo).toLocaleString('pt-BR')}</p>
               
               <div className="matchup">
-                <span>{game.time_casa} {game.status === 'finalizado' ? game.gols_casa_real : ''}</span>
-                <span className="vs">X</span>
-                <span>{game.status === 'finalizado' ? game.gols_fora_real : ''} {game.time_fora}</span>
+                <span>{getFlag(game.time_casa)} {game.time_casa} {game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_casa_real}</span> : ''}</span>
+                <span className="vs">💥</span>
+                <span>{game.status === 'finalizado' ? <span style={{color:'var(--primary)'}}>{game.gols_fora_real}</span> : ''} {game.time_fora} {getFlag(game.time_fora)}</span>
               </div>
 
               {game.status !== 'finalizado' ? (
                 <button className="btn" onClick={() => openBetModal(game.id)}>
-                  Dar Meu Palpite (R$ 10,00)
+                  Dar Meu Palpite (R$ 10,00) 💸
                 </button>
               ) : (
                 <div style={{marginTop: '2rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', borderRadius: '12px'}}>
-                  <h3 style={{color: '#10b981', marginBottom: '1rem'}}>Fim de Jogo!</h3>
+                  <h3 style={{color: '#10b981', marginBottom: '1rem'}}>🏁 Fim de Jogo!</h3>
                   <p style={{color: 'var(--text-main)', marginBottom: '1rem'}}>
-                    {winners.length > 0 ? `Os ganhadores vão dividir os R$ ${poolTotal.toFixed(2)}!` : 'Ninguém acertou o placar exato desta vez!'}
+                    {winners.length > 0 ? `🎊 Os ganhadores vão dividir os R$ ${poolTotal.toFixed(2)}!` : '💔 Ninguém acertou o placar exato desta vez!'}
                   </p>
                   {winners.map((w, i) => (
                     <div key={i} style={{fontWeight: 'bold', color: 'var(--primary)', fontSize: '1.2rem', margin: '0.5rem 0'}}>
@@ -150,16 +161,18 @@ export default function Dashboard({ user, setUser }) {
 
         {myBets.length > 0 && (
           <div className="my-bets">
-            <h3 style={{marginBottom: '1rem'}}>Meus Palpites Registrados</h3>
+            <h3 style={{marginBottom: '1rem'}}>📋 Meus Palpites Registrados</h3>
             <div className="glass-panel" style={{padding: '0'}}>
               {myBets.map(bet => (
                 <div key={bet.id} className="bet-item">
                   <div>
-                    <strong style={{color:'var(--primary)'}}>{bet.time_casa} {bet.gols_casa} x {bet.gols_fora} {bet.time_fora}</strong>
-                    <div style={{fontSize:'0.8rem', color:'var(--text-muted)', marginTop:'0.2rem'}}>{new Date(bet.criado_em).toLocaleString('pt-BR')}</div>
+                    <strong style={{color:'var(--primary)'}}>
+                      {getFlag(bet.time_casa)} {bet.time_casa} {bet.gols_casa} x {bet.gols_fora} {bet.time_fora} {getFlag(bet.time_fora)}
+                    </strong>
+                    <div style={{fontSize:'0.8rem', color:'var(--text-muted)', marginTop:'0.2rem'}}>⌚ {new Date(bet.criado_em).toLocaleString('pt-BR')}</div>
                   </div>
                   <div style={{color: bet.status_pagamento === 'pendente' ? '#f59e0b' : '#10b981', fontWeight: 'bold', fontSize:'0.9rem'}}>
-                    {bet.status_pagamento.toUpperCase()}
+                    {bet.status_pagamento === 'pendente' ? '⏳ PENDENTE' : '✅ APROVADO'}
                   </div>
                 </div>
               ))}
@@ -176,24 +189,24 @@ export default function Dashboard({ user, setUser }) {
           <div className="glass-panel modal-content" onClick={e => e.stopPropagation()}>
             {!qrCodeData ? (
               <>
-                <h2 style={{color: 'var(--primary)'}}>Qual o seu palpite?</h2>
+                <h2 style={{color: 'var(--primary)'}}>🤔 Qual o seu palpite?</h2>
                 <p style={{fontSize:'0.9rem', color: 'var(--text-muted)', marginTop:'0.5rem'}}>Insira o placar exato para confirmar sua aposta.</p>
                 
-                {modalError && <p style={{color: '#ef4444', marginTop: '1rem'}}>{modalError}</p>}
+                {modalError && <p style={{color: '#ef4444', marginTop: '1rem'}}>⚠️ {modalError}</p>}
                 
                 <div className="score-inputs">
                   <input type="number" min="0" value={golsCasa} onChange={e => setGolsCasa(e.target.value)} />
-                  <span style={{fontSize:'1.5rem'}}>X</span>
+                  <span style={{fontSize:'1.5rem'}}>✖️</span>
                   <input type="number" min="0" value={golsFora} onChange={e => setGolsFora(e.target.value)} />
                 </div>
                 
                 <button className="btn" onClick={handleBet} disabled={loading}>
-                  {loading ? 'Gerando...' : 'Confirmar Pagamento R$ 10'}
+                  {loading ? 'Gerando QR Code... ⏳' : 'Confirmar Pagamento R$ 10 🚀'}
                 </button>
               </>
             ) : (
               <>
-                <h2 style={{color: '#10b981'}}>Palpite Registrado!</h2>
+                <h2 style={{color: '#10b981'}}>✅ Palpite Registrado!</h2>
                 <p style={{fontSize:'0.9rem', color: 'var(--text-muted)', marginTop:'0.5rem'}}>
                   Abra o app do seu banco e escaneie o código abaixo para confirmar sua aposta de R$ 10,00.
                 </p>
@@ -205,8 +218,8 @@ export default function Dashboard({ user, setUser }) {
                   {pixKey}
                 </div>
                 
-                <button className="btn" style={{background: 'transparent', border: '1px solid var(--text-muted)'}} onClick={() => setActiveGameId(null)}>
-                  Fechar
+                <button className="btn" style={{background: 'transparent', border: '1px solid var(--text-muted)', color: 'white', animation: 'none', boxShadow: 'none'}} onClick={() => setActiveGameId(null)}>
+                  Fechar ✖️
                 </button>
               </>
             )}
