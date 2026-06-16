@@ -113,7 +113,6 @@ export default function Dashboard({ user, setUser }) {
         <div className="pool-total">
           <p>Prêmio Acumulado do Bolão</p>
           <h2>R$ {Number(poolTotal).toFixed(2).replace('.', ',')}</h2>
-          <p style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>Já descontada a taxa de gerência (20%)</p>
         </div>
 
         <h3 style={{marginBottom: '1.5rem'}}>Aposta Oficial</h3>
