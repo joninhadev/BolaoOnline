@@ -190,7 +190,7 @@ export default function Admin() {
                                 <option value="">Selecione...</option>
                                 {games.filter(g => g.status !== 'finalizado').map(g => (
                                     <option key={g.id} value={g.id}>
-                                        {g.time_casa} x {g.time_fora} ({new Date(g.data_jogo).toLocaleDateString('pt-BR')})
+                                        {g.time_casa} x {g.time_fora} ({new Date(g.data_jogo).toLocaleString('pt-BR')})
                                     </option>
                                 ))}
                             </select>
@@ -220,7 +220,7 @@ export default function Admin() {
                                 <option value="">Selecione...</option>
                                 {games.map(g => (
                                     <option key={g.id} value={g.id}>
-                                        {g.time_casa} x {g.time_fora} ({new Date(g.data_jogo).toLocaleDateString('pt-BR')})
+                                        {g.time_casa} x {g.time_fora} ({new Date(g.data_jogo).toLocaleString('pt-BR')})
                                     </option>
                                 ))}
                             </select>
