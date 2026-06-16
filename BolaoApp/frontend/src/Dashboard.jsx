@@ -91,19 +91,58 @@ export default function Dashboard({ user, setUser }) {
 
   const getFlagCode = (teamName) => {
     if (!teamName) return null;
-    const name = teamName.trim().toLowerCase();
+    const name = teamName.trim().toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove acentos para facilitar a busca (ex: "suiça" -> "suica")
+
     const codes = {
-      'brasil': 'br', 'haiti': 'ht', 'argentina': 'ar', 'alemanha': 'de',
-      'frança': 'fr', 'espanha': 'es', 'inglaterra': 'gb-eng', 'itália': 'it',
-      'portugal': 'pt', 'uruguai': 'uy', 'colômbia': 'co', 'chile': 'cl',
-      'holanda': 'nl', 'bélgica': 'be', 'croácia': 'hr', 'méxico': 'mx',
-      'eua': 'us', 'japão': 'jp', 'coreia do sul': 'kr', 'austrália': 'au',
-      'bolívia': 'bo', 'peru': 'pe', 'paraguai': 'py', 'equador': 'ec',
-      'venezuela': 've', 'suíça': 'ch', 'suiça': 'ch', 'suécia': 'se',
-      'polônia': 'pl', 'marrocos': 'ma', 'senegal': 'sn', 'canadá': 'ca',
-      'camarões': 'cm', 'sérvia': 'rs', 'gana': 'gh', 'costa rica': 'cr',
-      'país de gales': 'gb-wls', 'dinamarca': 'dk', 'tunísia': 'tn', 
-      'arábia saudita': 'sa', 'catar': 'qa'
+      'afeganistao': 'af', 'africa do sul': 'za', 'albania': 'al', 'alemanha': 'de',
+      'andorra': 'ad', 'angola': 'ao', 'antigua e barbuda': 'ag', 'arabia saudita': 'sa',
+      'argelia': 'dz', 'argentina': 'ar', 'armenia': 'am', 'australia': 'au',
+      'austria': 'at', 'azerbaijao': 'az', 'bahamas': 'bs', 'bangladesh': 'bd',
+      'barbados': 'bb', 'barein': 'bh', 'belgica': 'be', 'belize': 'bz',
+      'benin': 'bj', 'bielorrussia': 'by', 'bolivia': 'bo', 'bosnia': 'ba',
+      'botsuana': 'bw', 'brasil': 'br', 'brunei': 'bn', 'bulgaria': 'bg',
+      'burkina faso': 'bf', 'burundi': 'bi', 'butao': 'bt', 'cabo verde': 'cv',
+      'camaroes': 'cm', 'camboja': 'kh', 'canada': 'ca', 'catar': 'qa', 'qatar': 'qa',
+      'cazaquistao': 'kz', 'chade': 'td', 'chile': 'cl', 'china': 'cn',
+      'chipre': 'cy', 'colombia': 'co', 'comores': 'km', 'congo': 'cg',
+      'coreia do norte': 'kp', 'coreia do sul': 'kr', 'costa do marfim': 'ci',
+      'costa rica': 'cr', 'croacia': 'hr', 'cuba': 'cu', 'dinamarca': 'dk',
+      'djibuti': 'dj', 'dominica': 'dm', 'egito': 'eg', 'el salvador': 'sv',
+      'emirados arabes': 'ae', 'equador': 'ec', 'eritreia': 'er', 'eslovaquia': 'sk',
+      'eslovenia': 'si', 'espanha': 'es', 'estados unidos': 'us', 'eua': 'us', 'usa': 'us',
+      'estonia': 'ee', 'etiopia': 'et', 'fiji': 'fj', 'filipinas': 'ph',
+      'finlandia': 'fi', 'franca': 'fr', 'gabao': 'ga', 'gambia': 'gm',
+      'gana': 'gh', 'georgia': 'ge', 'granada': 'gd', 'grecia': 'gr',
+      'guatemala': 'gt', 'guiana': 'gy', 'guine': 'gn', 'guine-bissau': 'gw',
+      'guine equatorial': 'gq', 'haiti': 'ht', 'honduras': 'hn', 'hungria': 'hu',
+      'iemen': 'ye', 'india': 'in', 'indonesia': 'id', 'inglaterra': 'gb-eng',
+      'ira': 'ir', 'iraque': 'iq', 'irlanda': 'ie', 'islandia': 'is',
+      'israel': 'il', 'italia': 'it', 'jamaica': 'jm', 'japao': 'jp',
+      'jordania': 'jo', 'kuwait': 'kw', 'laos': 'la', 'lesoto': 'ls',
+      'letonia': 'lv', 'libano': 'lb', 'liberia': 'lr', 'libia': 'ly',
+      'liechtenstein': 'li', 'lituania': 'lt', 'luxemburgo': 'lu', 'macedonia': 'mk',
+      'madagascar': 'mg', 'malasia': 'my', 'malaui': 'mw', 'maldivas': 'mv',
+      'mali': 'ml', 'malta': 'mt', 'marrocos': 'ma', 'mauricio': 'mu',
+      'mauritania': 'mr', 'mexico': 'mx', 'mianmar': 'mm', 'micronesia': 'fm',
+      'mocambique': 'mz', 'moldavia': 'md', 'monaco': 'mc', 'mongolia': 'mn',
+      'montenegro': 'me', 'namibia': 'na', 'nauru': 'nr', 'nepal': 'np',
+      'nicaragua': 'ni', 'niger': 'ne', 'nigeria': 'ng', 'noruega': 'no',
+      'nova zelandia': 'nz', 'oma': 'om', 'paises baixos': 'nl', 'holanda': 'nl',
+      'pais de gales': 'gb-wls', 'gales': 'gb-wls', 'palau': 'pw', 'panama': 'pa',
+      'papua nova guine': 'pg', 'paquistao': 'pk', 'paraguai': 'py', 'peru': 'pe',
+      'polonia': 'pl', 'portugal': 'pt', 'quenia': 'ke', 'quirguistao': 'kg',
+      'reino unido': 'gb', 'republica checa': 'cz', 'republica dominicana': 'do',
+      'romenia': 'ro', 'ruanda': 'rw', 'russia': 'ru', 'samoa': 'ws',
+      'san marino': 'sm', 'santa lucia': 'lc', 'sao tome e principe': 'st',
+      'senegal': 'sn', 'servia': 'rs', 'seychelles': 'sc', 'singapura': 'sg',
+      'siria': 'sy', 'somalia': 'so', 'sri lanka': 'lk', 'suazilandia': 'sz',
+      'sudao': 'sd', 'sudao do sul': 'ss', 'suecia': 'se', 'suica': 'ch',
+      'suriname': 'sr', 'tadjiquistao': 'tj', 'tailandia': 'th', 'tanzania': 'tz',
+      'togo': 'tg', 'tonga': 'to', 'trinidad e tobago': 'tt', 'tunisia': 'tn',
+      'turcomenistao': 'tm', 'turquia': 'tr', 'tuvalu': 'tv', 'ucrania': 'ua',
+      'uganda': 'ug', 'uruguai': 'uy', 'uzbequistao': 'uz', 'vanuatu': 'vu',
+      'vaticano': 'va', 'venezuela': 've', 'vietna': 'vn', 'zambia': 'zm', 'zimbabue': 'zw'
     };
     return codes[name] || null;
   };

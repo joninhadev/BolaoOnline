@@ -237,6 +237,24 @@ app.post('/admin/games', async (req, res) => {
     }
 });
 
+app.put('/admin/games/:id', async (req, res) => {
+    try {
+        const { password, time_casa, time_fora, data_jogo } = req.body;
+        const game_id = req.params.id;
+        const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+        if (password !== adminPass) return res.status(403).json({ error: 'Senha incorreta!' });
+
+        await pool.query(
+            'UPDATE games SET time_casa = ?, time_fora = ?, data_jogo = ? WHERE id = ?',
+            [time_casa, time_fora, data_jogo, game_id]
+        );
+        io.emit('gameFinished', {}); // trigger reload
+        res.json({ message: 'Jogo atualizado com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao atualizar jogo.' });
+    }
+});
+
 app.post('/admin/finish', async (req, res) => {
     try {
         const { password, game_id, gols_casa, gols_fora } = req.body;

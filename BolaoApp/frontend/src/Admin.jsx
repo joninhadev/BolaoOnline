@@ -20,6 +20,12 @@ export default function Admin() {
     const [golsCasa, setGolsCasa] = useState('');
     const [golsFora, setGolsFora] = useState('');
 
+    // Editar Jogo
+    const [editGameId, setEditGameId] = useState('');
+    const [editTimeCasa, setEditTimeCasa] = useState('');
+    const [editTimeFora, setEditTimeFora] = useState('');
+    const [editDataJogo, setEditDataJogo] = useState('');
+
     // Histórico de Palpites
     const [allBets, setAllBets] = useState([]);
 
@@ -74,6 +80,42 @@ export default function Admin() {
             fetchGames();
         } catch (err) {
             setMessage('❌ ' + (err.response?.data?.error || 'Erro ao encerrar bolão'));
+        }
+    };
+
+    const handleSelectEditGame = (e) => {
+        const id = e.target.value;
+        setEditGameId(id);
+        if (id) {
+            const game = games.find(g => g.id === parseInt(id));
+            if (game) {
+                setEditTimeCasa(game.time_casa);
+                setEditTimeFora(game.time_fora);
+                const data = new Date(game.data_jogo);
+                const localStr = new Date(data.getTime() - data.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+                setEditDataJogo(localStr);
+            }
+        } else {
+            setEditTimeCasa('');
+            setEditTimeFora('');
+            setEditDataJogo('');
+        }
+    };
+
+    const handleEditGame = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(`${apiUrl}/admin/games/${editGameId}`, {
+                password,
+                time_casa: editTimeCasa,
+                time_fora: editTimeFora,
+                data_jogo: editDataJogo
+            });
+            setMessage('✅ ' + res.data.message);
+            setEditGameId(''); setEditTimeCasa(''); setEditTimeFora(''); setEditDataJogo('');
+            fetchGames();
+        } catch (err) {
+            setMessage('❌ ' + (err.response?.data?.error || 'Erro ao editar jogo'));
         }
     };
 
@@ -165,6 +207,41 @@ export default function Admin() {
                             </div>
                         </div>
                         <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#ef4444' }}>Finalizar e Pagar Pix</button>
+                    </form>
+                </div>
+
+                {/* EDITAR JOGO */}
+                <div className="glass-panel">
+                    <h3 style={{ color: '#f59e0b', marginBottom: '1.5rem' }}>Editar Jogo Existente</h3>
+                    <form onSubmit={handleEditGame}>
+                        <div className="input-group">
+                            <label>Selecione o Jogo</label>
+                            <select value={editGameId} onChange={handleSelectEditGame} required>
+                                <option value="">Selecione...</option>
+                                {games.map(g => (
+                                    <option key={g.id} value={g.id}>
+                                        {g.time_casa} x {g.time_fora} ({new Date(g.data_jogo).toLocaleDateString('pt-BR')})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        {editGameId && (
+                            <>
+                                <div className="input-group">
+                                    <label>Time da Casa</label>
+                                    <input type="text" value={editTimeCasa} onChange={e => setEditTimeCasa(e.target.value)} required />
+                                </div>
+                                <div className="input-group">
+                                    <label>Time de Fora</label>
+                                    <input type="text" value={editTimeFora} onChange={e => setEditTimeFora(e.target.value)} required />
+                                </div>
+                                <div className="input-group">
+                                    <label>Data e Hora do Jogo</label>
+                                    <input type="datetime-local" value={editDataJogo} onChange={e => setEditDataJogo(e.target.value)} required />
+                                </div>
+                                <button type="submit" className="btn" style={{ marginTop: '1rem', background: '#f59e0b' }}>Atualizar Jogo</button>
+                            </>
+                        )}
                     </form>
                 </div>
 
