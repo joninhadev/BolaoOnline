@@ -41,6 +41,12 @@ export default function Dashboard({ user, setUser }) {
     fetchData();
   }, []);
 
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   const openBetModal = (gameId) => {
     try {
         setActiveGameId(gameId);
@@ -188,11 +194,40 @@ export default function Dashboard({ user, setUser }) {
                 <span style={{ display: 'flex', alignItems: 'center' }}>{game.status === 'finalizado' ? <span style={{color:'var(--primary)', marginRight: '0.5rem'}}>{game.gols_fora_real}</span> : ''} <span style={{ marginRight: '0.5rem' }}>{game.time_fora}</span> <Flag teamName={game.time_fora} /></span>
               </div>
 
-              {game.status !== 'finalizado' ? (
-                <button className="btn" onClick={() => openBetModal(game.id)}>
-                  Dar Meu Palpite (R$ 10,00)
-                </button>
-              ) : (
+              {(() => {
+                const gameTime = new Date(game.data_jogo);
+                const isTimeOver = now >= gameTime;
+                
+                let remainingStr = '';
+                if (!isTimeOver) {
+                    const diff = gameTime - now;
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const mins = Math.floor((diff / (1000 * 60)) % 60);
+                    const secs = Math.floor((diff / 1000) % 60);
+                    remainingStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+
+                if (game.status !== 'finalizado') {
+                  return (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+                      <button className="btn" onClick={() => openBetModal(game.id)} disabled={isTimeOver} style={{ width: 'auto', flex: 1, minWidth: '200px' }}>
+                        {isTimeOver ? 'Apostas Encerradas' : 'Dar Meu Palpite (R$ 10,00)'}
+                      </button>
+                      
+                      {!isTimeOver ? (
+                        <div style={{ textAlign: 'right', minWidth: '120px' }}>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Tempo Restante</p>
+                          <strong style={{ fontSize: '1.1rem', color: '#f59e0b', fontFamily: 'monospace' }}>{remainingStr}</strong>
+                        </div>
+                      ) : (
+                        <div style={{ textAlign: 'right', minWidth: '120px' }}>
+                          <strong style={{ fontSize: '1rem', color: '#ef4444' }}>Aguardando Resultado</strong>
+                        </div>
+                      )}
+                    </div>
+                  );
+                } else {
+                  return (
                 <div style={{marginTop: '1.5rem', padding: '1rem', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid var(--primary)', borderRadius: '8px'}}>
                   <h3 style={{color: 'var(--primary)', marginBottom: '1rem', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px'}}>Partida Encerrada</h3>
                   <p style={{color: 'var(--text-main)', marginBottom: '1rem', fontSize: '0.875rem'}}>
@@ -204,7 +239,9 @@ export default function Dashboard({ user, setUser }) {
                     </div>
                   ))}
                 </div>
-              )}
+                  );
+                }
+              })()}
             </div>
           ))}
         </div>

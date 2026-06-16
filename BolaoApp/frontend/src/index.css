@@ -84,12 +84,30 @@ body {
   color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem;
   cursor: pointer; transition: background-color 0.2s;
 }
-.btn:hover { background: var(--primary-hover); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn:disabled, .btn[disabled] {
+  background: var(--border-light);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-outline {
-  background: transparent; border: 1px solid var(--border-light); color: var(--text-main);
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-main);
 }
 .btn-outline:hover { background: var(--bg-panel-light); }
+.btn-outline:disabled, .btn-outline[disabled] {
+  border-color: var(--bg-panel-light);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
 
 /* Dashboard */
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1.5rem; }
