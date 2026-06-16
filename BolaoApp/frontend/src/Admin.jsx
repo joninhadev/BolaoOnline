@@ -99,7 +99,7 @@ export default function Admin() {
     };
 
     return (
-        <div className="container" style={{ flexDirection: 'column', maxWidth: '800px', alignItems: 'center' }}>
+        <div className="container" style={{ flexDirection: 'column' }}>
             <h1 style={{ color: 'var(--text-main)', marginBottom: '1rem', textAlign: 'center' }}>Painel de Administração</h1>
             <div style={{ width: '100%', marginBottom: '2rem' }}>
                 <a href="/dashboard" style={{ color: 'var(--primary)' }}>Voltar ao Início</a>
